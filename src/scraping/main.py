@@ -39,10 +39,10 @@ def get_ads_quantity(driver):
 def launch_browser(zone, district):
     driver = uc.Chrome(options=get_chrome_options())
     driver.get(f"https://www.zapimoveis.com.br/venda/imoveis/sp+sao-paulo+{zone}+{district}")
-    sleep(randint(30, 60))
     ad_quantity = get_ads_quantity(driver)
-    driver.quit()
     write_to_csv_ads([f"https://www.zapimoveis.com.br/venda/imoveis/sp+sao-paulo+{zone}+{district}", ad_quantity])
+    sleep(randint(30, 60))
+    driver.quit()
     return ad_quantity
 
 for zone, districts in districts_list.items():
