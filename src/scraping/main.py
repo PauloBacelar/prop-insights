@@ -26,19 +26,22 @@ def launch_browser(zone, district):
     driver = uc.Chrome(options=get_chrome_options())
     website = f"https://www.zapimoveis.com.br/venda/imoveis/sp+sao-paulo+{zone}+{district}"
     driver.get(website)
-    get_ads_quantity(driver)
+    ad_quantity = get_ads_quantity(driver)
     sleep(sleep_time)
     driver.quit()
 
 def get_ads_quantity(driver):
-    print(driver.find_element(By.TAG_NAME, "h1").text)
+    h1_text = driver.find_element(By.TAG_NAME, "h1").text
+    if h1_text.isnumeric():
+        ad_quantity = h1_text.split(' ')[0].replace('.', '')
+        return ad_quantity
+    else:
+        return 0
 
 
-# Mock variables, get from ./districts.py later
 zones = list(districts_list.keys())
-
-sleep_time = randint(10000, 10001)
+sleep_time = randint(30, 60)
 for zone in zones:
     for district in districts_list[zone]:
         launch_browser(zone, district)
-        sleep_time += randint(0, 5)
+        sleep_time += randint(5, 15)
