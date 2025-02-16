@@ -8,6 +8,7 @@ from selenium.webdriver.chrome.options import Options
 from random_user_agent.user_agent import UserAgent
 from random_user_agent.params import SoftwareName, OperatingSystem
 
+
 def get_user_agent():
     user_agent_rotator = UserAgent(
         software_names=[SoftwareName.CHROME.value],
@@ -16,11 +17,13 @@ def get_user_agent():
     )
     return user_agent_rotator.get_random_user_agent()
 
+
 # Testing function - delete later
 def write_to_csv_ads(row):
     with open("./utils/ads.csv", 'a', newline='') as csv_file:
         writer = csv.writer(csv_file)
         writer.writerow(row)
+
 
 def get_chrome_options():
     options = Options()
@@ -30,11 +33,13 @@ def get_chrome_options():
     options.add_argument(f"user-agent={get_user_agent()}")
     return options
 
+
 def get_ads_quantity(driver):
     try:
         return int(driver.find_element(By.TAG_NAME, "h1").text.split()[0].replace('.', ''))
     except:
         return 0
+
 
 def launch_browser(zone, district):
     driver = uc.Chrome(options=get_chrome_options())
@@ -44,6 +49,7 @@ def launch_browser(zone, district):
     sleep(randint(30, 60))
     driver.quit()
     return ad_quantity
+
 
 for zone, districts in districts_list.items():
     for district in districts:
