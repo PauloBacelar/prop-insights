@@ -1,4 +1,5 @@
 import undetected_chromedriver as uc
+import csv
 from districts import districts_list
 from random import randint
 from time import sleep
@@ -7,41 +8,44 @@ from selenium.webdriver.chrome.options import Options
 from random_user_agent.user_agent import UserAgent
 from random_user_agent.params import SoftwareName, OperatingSystem
 
-
 def get_user_agent():
-    software_names = [SoftwareName.CHROME.value]
-    operating_systems = [OperatingSystem.WINDOWS.value, OperatingSystem.LINUX.value]
-    user_agent_rotator = UserAgent(software_names=software_names, operating_systems=operating_systems, limit=100)
+    user_agent_rotator = UserAgent(
+        software_names=[SoftwareName.CHROME.value],
+        operating_systems=[OperatingSystem.WINDOWS.value, OperatingSystem.LINUX.value],
+        limit=100
+    )
     return user_agent_rotator.get_random_user_agent()
 
+# Testing function - delete later
+def write_to_csv_ads(row):
+    with open("./utils/ads.csv", 'a', newline='') as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerow(row)
+
 def get_chrome_options():
-    chrome_options = Options()
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--disable-blink-features=AutomationControlled")
-    chrome_options.add_argument(f"user-agent=choice{get_user_agent()}")
-    return chrome_options
+    options = Options()
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-blink-features=AutomationControlled")
+    options.add_argument(f"user-agent={get_user_agent()}")
+    return options
+
+def get_ads_quantity(driver):
+    try:
+        return int(driver.find_element(By.TAG_NAME, "h1").text.split()[0].replace('.', ''))
+    except:
+        return 0
 
 def launch_browser(zone, district):
     driver = uc.Chrome(options=get_chrome_options())
-    website = f"https://www.zapimoveis.com.br/venda/imoveis/sp+sao-paulo+{zone}+{district}"
-    driver.get(website)
+    driver.get(f"https://www.zapimoveis.com.br/venda/imoveis/sp+sao-paulo+{zone}+{district}")
+    sleep(randint(30, 60))
     ad_quantity = get_ads_quantity(driver)
-    sleep(sleep_time)
     driver.quit()
+    write_to_csv_ads([f"https://www.zapimoveis.com.br/venda/imoveis/sp+sao-paulo+{zone}+{district}", ad_quantity])
+    return ad_quantity
 
-def get_ads_quantity(driver):
-    h1_text = driver.find_element(By.TAG_NAME, "h1").text
-    if h1_text.isnumeric():
-        ad_quantity = h1_text.split(' ')[0].replace('.', '')
-        return ad_quantity
-    else:
-        return 0
-
-
-zones = list(districts_list.keys())
-sleep_time = randint(30, 60)
-for zone in zones:
-    for district in districts_list[zone]:
+for zone, districts in districts_list.items():
+    for district in districts:
         launch_browser(zone, district)
-        sleep_time += randint(5, 15)
+        sleep(randint(5, 15))

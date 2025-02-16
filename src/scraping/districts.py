@@ -1,10 +1,15 @@
 import csv
 
+
 def to_kebab_case(string):
-    return '-'.join(string.split(' '))
+    return '-'.join(string.split())
+
 
 def abbreviate_string(string):
-    return string.replace("vila", "vl").replace("parque", "pq").replace("jardim", "jd")
+    abbreviations = {"vila": "vl", "parque": "pq", "jardim": "jd"}
+    for word, abbr in abbreviations.items():
+        string = string.replace(word, abbr)
+    return string
 
 
 districts_list = {
@@ -15,16 +20,14 @@ districts_list = {
     "centro": [],
 }
 
-with open("utils/distritos-sp.csv", mode="r") as file:
-    zones = list(districts_list.keys())
-    zoneIndex = 0
+with open("utils/distritos-sp.csv", mode="r", encoding="utf-8") as file:
+    csv_reader = csv.reader(file)
+    zones = iter(districts_list.keys())
+    current_zone = next(zones, None)
 
-    csvFile = csv.reader(file)
-    for line in csvFile:
-        zone = zones[zoneIndex]
-
-        if len(line) > 0:
+    for line in csv_reader:
+        if line:
             district_name = to_kebab_case(abbreviate_string(line[0].lower()))
-            districts_list[zone].append(district_name)
+            districts_list[current_zone].append(district_name)
         else:
-            zoneIndex += 1
+            current_zone = next(zones, None)
