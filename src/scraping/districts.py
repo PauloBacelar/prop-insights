@@ -5,7 +5,19 @@ def to_kebab_case(string):
 
 
 def abbreviate_string(string):
-    abbreviations = {"vila": "vl", "parque": "pq", "jardim": "jd"}
+    abbreviations = {
+        "vila": "vl",
+        "parque": "pq",
+        "jardim": "jd",
+        "sao": "s",
+        "santa": "sta",
+        "santo": "sto",
+        "cidade": "cid",
+        "ponte": "pte",
+        "nova": "nv",
+        "novo": "nv"
+    }
+
     for word, abbr in abbreviations.items():
         string = string.replace(word, abbr)
     return string
