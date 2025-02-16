@@ -53,5 +53,6 @@ def launch_browser(zone, district):
 
 for zone, districts in districts_list.items():
     for district in districts:
-        launch_browser(zone, district)
-        sleep(randint(5, 15))
+        print(f"https://www.zapimoveis.com.br/venda/imoveis/sp+sao-paulo+{zone}+{district}")
+        #launch_browser(zone, district)
+        #sleep(randint(5, 15))
