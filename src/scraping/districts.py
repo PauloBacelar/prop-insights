@@ -1,6 +1,5 @@
 import csv
 
-
 def to_kebab_case(string):
     return '-'.join(string.split())
 
