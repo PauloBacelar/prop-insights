@@ -1,15 +1,22 @@
 import csv
 
-districts = {
-    "zona norte": [],
-    "zona sul": [],
-    "zona leste": [],
-    "zona oeste": [],
+def to_kebab_case(string):
+    return '-'.join(string.split(' '))
+
+def abbreviate_string(string):
+    return string.replace("vila", "vl").replace("parque", "pq").replace("jardim", "jd")
+
+
+districts_list = {
+    "zona-norte": [],
+    "zona-sul": [],
+    "zona-leste": [],
+    "zona-oeste": [],
     "centro": [],
 }
 
 with open("utils/distritos-sp.csv", mode="r") as file:
-    zones = list(districts.keys())
+    zones = list(districts_list.keys())
     zoneIndex = 0
 
     csvFile = csv.reader(file)
@@ -17,7 +24,7 @@ with open("utils/distritos-sp.csv", mode="r") as file:
         zone = zones[zoneIndex]
 
         if len(line) > 0:
-            district_name = line[0].lower().replace("vila", "vl").replace("parque", "pq").replace("jardim", "jd")
-            districts[zone].append(district_name)
+            district_name = to_kebab_case(abbreviate_string(line[0].lower()))
+            districts_list[zone].append(district_name)
         else:
             zoneIndex += 1

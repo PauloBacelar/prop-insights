@@ -1,7 +1,9 @@
-from random import randint, choice
-from time import sleep
-from selenium.webdriver.chrome.options import Options
 import undetected_chromedriver as uc
+from districts import districts_list
+from random import randint
+from time import sleep
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
 from random_user_agent.user_agent import UserAgent
 from random_user_agent.params import SoftwareName, OperatingSystem
 
@@ -24,22 +26,19 @@ def launch_browser(zone, district):
     driver = uc.Chrome(options=get_chrome_options())
     website = f"https://www.zapimoveis.com.br/venda/imoveis/sp+sao-paulo+{zone}+{district}"
     driver.get(website)
+    get_ads_quantity(driver)
     sleep(sleep_time)
     driver.quit()
 
+def get_ads_quantity(driver):
+    print(driver.find_element(By.TAG_NAME, "h1").text)
+
 
 # Mock variables, get from ./districts.py later
-districts = {
-    "zona-norte": ["tucuruvi", "jacana"],
-    "zona-leste": ["mooca", "tatuape"],
-    "zona-sul": ["grajau", "vl-mariana"],
-    "zona-oeste": ["butanta", "vl-sonia"],
-    "centro": ["se", "liberdade"]
-}
-zones = list(districts.keys())
+zones = list(districts_list.keys())
 
-sleep_time = randint(30, 60)
+sleep_time = randint(10000, 10001)
 for zone in zones:
-    for district in districts[zone]:
+    for district in districts_list[zone]:
         launch_browser(zone, district)
-        sleep_time += randint(5, 15)
+        sleep_time += randint(0, 5)
