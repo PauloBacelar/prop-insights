@@ -67,13 +67,38 @@ def get_properties_data(driver):
     properties_elements = properties_list_container.find_elements(By.XPATH, "./*")
 
     for elem in properties_elements:
-        if ("Na planta" or "Em construção") in elem.text:
+        if (("Na planta" or "Em construção") in elem.text) or ("R$" not in elem.text):
             continue
 
-        print(elem.text.split('\n'))
-        print("--------------------------")
+        property_divs = get_property_card_divs(elem)
+        print(property_divs)
 
     return 0
+
+
+def get_property_card_divs(card):
+    prices_div = safe_find_property_div(card, 'div[data-cy="rp-cardProperty-price-txt"]')
+    location_div = safe_find_property_div(card, 'section[data-testid="card-address"]')
+    area_div = safe_find_property_div(card, 'li[data-cy="rp-cardProperty-propertyArea-txt"]')
+    bedroom_quant_div = safe_find_property_div(card, 'li[data-cy="rp-cardProperty-bedroomQuantity-txt"]')
+    bathroom_quant_div = safe_find_property_div(card, 'li[data-cy="rp-cardProperty-bathroomQuantity-txt"]')
+    parking_space_quant_div = safe_find_property_div(card, 'li[data-cy="rp-cardProperty-parkingSpacesQuantity-txt"]')
+
+    return {
+        "prices": prices_div,
+        "location": location_div,
+        "area": area_div,
+        "bedrooms": bedroom_quant_div,
+        "bathrooms": bathroom_quant_div,
+        "parking_spaces": parking_space_quant_div
+    }
+
+
+def safe_find_property_div(card, selector):
+    try:
+        return card.find_element(By.CSS_SELECTOR, selector).text
+    except:
+        return None
 
 
 def write_property_info_on_csv(row):
