@@ -1,3 +1,5 @@
+import math
+
 import undetected_chromedriver as uc
 import csv
 from districts import districts_list
@@ -18,13 +20,6 @@ def get_user_agent():
     return user_agent_rotator.get_random_user_agent()
 
 
-# Testing function - delete later
-def write_to_csv_ads(row):
-    with open("./utils/ads.csv", 'a', newline='') as csv_file:
-        writer = csv.writer(csv_file)
-        writer.writerow(row)
-
-
 def get_chrome_options():
     options = Options()
     options.add_argument("--no-sandbox")
@@ -41,17 +36,57 @@ def get_ads_quantity(driver):
         return 0
 
 
-def launch_browser(zone, district):
+def launch_browser(url):
     driver = uc.Chrome(options=get_chrome_options())
-    driver.get(f"https://www.zapimoveis.com.br/venda/imoveis/sp+sao-paulo+{zone}+{district}")
-    ad_quantity = get_ads_quantity(driver)
-    write_to_csv_ads([f"https://www.zapimoveis.com.br/venda/imoveis/sp+sao-paulo+{zone}+{district}", ad_quantity])
-    sleep(randint(30, 60))
+    driver.get(url)
+
+    total_pages = math.ceil(get_ads_quantity(driver) / 105)
+    for i in range(total_pages):
+        load_all_page_ads(driver)
+        sleep(randint(15, 45))
+        properties_data = get_properties_data(driver)
+        # go_to_next_page(driver)
+        sleep(99999)
+
+
     driver.quit()
-    return ad_quantity
+
+
+def load_all_page_ads(driver):
+    scroll_banner_loader = driver.find_element(By.CLASS_NAME, "campaign")
+    driver.execute_script("arguments[0].scrollIntoView();", scroll_banner_loader)
+
+
+def go_to_next_page(driver):
+    button = driver.find_element(By.CSS_SELECTOR, 'button[data-testid="next-page"]')
+    button.click()
+
+
+def get_properties_data(driver):
+    properties_list_container = driver.find_element(By.CLASS_NAME, "listing-wrapper__content")
+    properties_elements = properties_list_container.find_elements(By.XPATH, "./*")
+
+    for elem in properties_elements:
+        if ("Na planta" or "Em construção") in elem.text:
+            continue
+
+        print(elem.text.split('\n'))
+        print("--------------------------")
+
+    return 0
+
+
+def write_property_info_on_csv(row):
+    pass
+    """""
+    with open("./utils/data.csv", 'a', newline='') as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerow(row)
+    """""
 
 
 for zone, districts in districts_list.items():
     for district in districts:
-        launch_browser(zone, district)
+        website = f"https://www.zapimoveis.com.br/venda/imoveis/sp+sao-paulo+{zone}+{district}"
+        launch_browser(website)
         sleep(randint(5, 15))
