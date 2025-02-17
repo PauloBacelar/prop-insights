@@ -41,9 +41,9 @@ def get_ads_quantity(driver):
         return 0
 
 
-def launch_browser(url):
+def launch_browser(zone, district):
     driver = uc.Chrome(options=get_chrome_options())
-    driver.get(url)
+    driver.get(f"https://www.zapimoveis.com.br/venda/imoveis/sp+sao-paulo+{zone}+{district}")
     ad_quantity = get_ads_quantity(driver)
     write_to_csv_ads([f"https://www.zapimoveis.com.br/venda/imoveis/sp+sao-paulo+{zone}+{district}", ad_quantity])
     sleep(randint(30, 60))
@@ -51,20 +51,7 @@ def launch_browser(url):
     return ad_quantity
 
 
-property_types = [
-    "apartamento_residencial",
-    "studio_residencial",
-    "kitnet_residencial",
-    "casa_residencial",
-    "sobrado_residencial",
-    "condominio_residencial",
-    "casa-vila_residencial",
-    "cobertura_residencial",
-    "flat_residencial",
-    "loft_residencial"
-]
 for zone, districts in districts_list.items():
     for district in districts:
-        website = f"https://www.zapimoveis.com.br/venda/imoveis/sp+sao-paulo+{zone}+{district}/?tipos={",".join(property_types)}"
-        launch_browser(website)
+        launch_browser(zone, district)
         sleep(randint(5, 15))
