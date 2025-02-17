@@ -85,8 +85,20 @@ def write_property_info_on_csv(row):
     """""
 
 
+property_types = [
+    "apartamento_residencial",
+    "studio_residencial",
+    "kitnet_residencial",
+    "casa_residencial",
+    "sobrado_residencial",
+    "condominio_residencial",
+    "casa-vila_residencial",
+    "cobertura_residencial",
+    "flat_residencial",
+    "loft_residencial"
+]
 for zone, districts in districts_list.items():
     for district in districts:
-        website = f"https://www.zapimoveis.com.br/venda/imoveis/sp+sao-paulo+{zone}+{district}"
+        website = f"https://www.zapimoveis.com.br/venda/imoveis/sp+sao-paulo+{zone}+{district}/?tipos={",".join(property_types)}"
         launch_browser(website)
         sleep(randint(5, 15))
