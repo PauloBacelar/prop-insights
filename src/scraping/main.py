@@ -36,7 +36,7 @@ def get_ads_quantity(driver):
         return 0
 
 
-def launch_browser(url):
+def launch_browser(url, district):
     driver = uc.Chrome(options=get_chrome_options())
     driver.get(url)
 
@@ -45,7 +45,7 @@ def launch_browser(url):
         sleep(randint(5, 10))
         load_all_page_ads(driver)
         sleep(randint(15, 45))
-        get_properties_data(driver)
+        get_properties_data(driver, district)
         sleep(randint(15, 45))
         go_to_next_page(driver)
 
@@ -63,7 +63,7 @@ def go_to_next_page(driver):
     button.click()
 
 
-def get_properties_data(driver):
+def get_properties_data(driver, district):
     properties_list_container = driver.find_element(By.CLASS_NAME, "listing-wrapper__content")
     properties_elements = properties_list_container.find_elements(By.XPATH, "./*")
 
@@ -75,16 +75,20 @@ def get_properties_data(driver):
         property_divs = get_property_card_divs(elem)
         property_data = {
             "property_id": property_divs["id"],
+            "district": district,
             "property_type": 1 if "casa" in property_divs["location"].lower() else 2,
-            "total_price": property_divs["prices"].split("\n")[0].replace("R$ ", "").replace(".", ""),
+            "total_price": property_divs["prices"].split("\n")[0].replace("R$ ", "").replace(".", "").replace("A partir de ", ""),
             "condo_fee": 0 if "Cond" not in property_divs["prices"] else
-            property_divs["prices"].replace("\nPreço abaixo do mercado", "").split("R$")[2].split(" ")[1],
+            property_divs["prices"].replace("\nPreço abaixo do mercado", "").split("R$")[2].split(" ")[1].replace(".", ""),
             "area": property_divs["area"].split(" ")[0],
             "bedroom_qnt": property_divs["bedrooms"],
             "bathroom_qnt": property_divs["bathrooms"],
-            "parking_spaces_qnt": property_divs["parking_spaces"]
+            "parking_spaces_qnt": 0 if not property_divs["parking_spaces"] else property_divs["parking_spaces"],
         }
 
+        for prop in list(property_data.keys()):
+            if (isinstance(property_data[prop], str)) and ("-" in property_data[prop]) and (property_data[prop].replace("-", "").isnumeric()):
+                property_data[prop] = (int(property_data[prop].split("-")[0]) + int(property_data[prop].split("-")[1])) / 2
         write_property_info_on_csv(list(property_data.values()))
         properties.append(property_data)
 
@@ -139,5 +143,5 @@ property_types = [
 for zone, districts in districts_list.items():
     for district in districts:
         website = f"https://www.zapimoveis.com.br/venda/imoveis/sp+sao-paulo+{zone}+{district}/?tipos={",".join(property_types)}"
-        launch_browser(website)
+        launch_browser(website, district)
         sleep(randint(5, 15))
