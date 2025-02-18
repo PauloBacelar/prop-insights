@@ -42,11 +42,12 @@ def launch_browser(url):
 
     total_pages = math.ceil(get_ads_quantity(driver) / 105)
     for i in range(total_pages):
+        sleep(randint(5, 10))
         load_all_page_ads(driver)
         sleep(randint(15, 45))
         properties_data = get_properties_data(driver)
-        # go_to_next_page(driver)
-        sleep(99999)
+        sleep(randint(15, 45))
+        go_to_next_page(driver)
 
 
     driver.quit()
@@ -66,14 +67,58 @@ def get_properties_data(driver):
     properties_list_container = driver.find_element(By.CLASS_NAME, "listing-wrapper__content")
     properties_elements = properties_list_container.find_elements(By.XPATH, "./*")
 
+    properties = []
     for elem in properties_elements:
-        if ("Na planta" or "Em construção") in elem.text:
+        if (("planta" or "construção") in elem.text.lower()) or ("R$" not in elem.text):
             continue
 
-        print(elem.text.split('\n'))
-        print("--------------------------")
+        property_divs = get_property_card_divs(elem)
+        property_data = {
+            "property_id": property_divs["id"],
+            "property_type": 1 if "casa" in property_divs["location"].lower() else 2,
+            "total_price": property_divs["prices"].split("\n")[0].replace("R$ ", "").replace(".", ""),
+            "condo_fee": 0 if "Cond" not in property_divs["prices"] else
+            property_divs["prices"].split("R$")[2].split(" ")[1],
+            "area": property_divs["area"].split(" ")[0],
+            "bedroom_qnt": property_divs["bedrooms"],
+            "bathroom_qnt": property_divs["bathrooms"],
+            "parking_spaces_qnt": property_divs["parking_spaces"]
+        }
 
-    return 0
+        for prop in list(property_data.keys()):
+            print(f"{prop}: {property_data[prop]}")
+        print("")
+
+        properties.append(property_data)
+
+    return properties
+
+
+def get_property_card_divs(card):
+    id = card.find_element(By.XPATH, "./*[1]").find_element(By.XPATH, "./*[1]").get_attribute("data-id")
+    prices_div = safe_find_property_div(card, 'div[data-cy="rp-cardProperty-price-txt"]')
+    location_div = safe_find_property_div(card, 'section[data-testid="card-address"]')
+    area_div = safe_find_property_div(card, 'li[data-cy="rp-cardProperty-propertyArea-txt"]')
+    bedroom_quant_div = safe_find_property_div(card, 'li[data-cy="rp-cardProperty-bedroomQuantity-txt"]')
+    bathroom_quant_div = safe_find_property_div(card, 'li[data-cy="rp-cardProperty-bathroomQuantity-txt"]')
+    parking_space_quant_div = safe_find_property_div(card, 'li[data-cy="rp-cardProperty-parkingSpacesQuantity-txt"]')
+
+    return {
+        "id": id,
+        "prices": prices_div,
+        "location": location_div,
+        "area": area_div,
+        "bedrooms": bedroom_quant_div,
+        "bathrooms": bathroom_quant_div,
+        "parking_spaces": parking_space_quant_div
+    }
+
+
+def safe_find_property_div(card, selector):
+    try:
+        return card.find_element(By.CSS_SELECTOR, selector).text
+    except:
+        return None
 
 
 def write_property_info_on_csv(row):
@@ -85,8 +130,20 @@ def write_property_info_on_csv(row):
     """""
 
 
+property_types = [
+    "apartamento_residencial",
+    "studio_residencial",
+    "kitnet_residencial",
+    "casa_residencial",
+    "sobrado_residencial",
+    "condominio_residencial",
+    "casa-vila_residencial",
+    "cobertura_residencial",
+    "flat_residencial",
+    "loft_residencial"
+]
 for zone, districts in districts_list.items():
     for district in districts:
-        website = f"https://www.zapimoveis.com.br/venda/imoveis/sp+sao-paulo+{zone}+{district}"
+        website = f"https://www.zapimoveis.com.br/venda/imoveis/sp+sao-paulo+{zone}+{district}/?tipos={",".join(property_types)}"
         launch_browser(website)
         sleep(randint(5, 15))
