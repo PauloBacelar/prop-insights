@@ -45,7 +45,7 @@ def launch_browser(url):
         sleep(randint(5, 10))
         load_all_page_ads(driver)
         sleep(randint(15, 45))
-        properties_data = get_properties_data(driver)
+        get_properties_data(driver)
         sleep(randint(15, 45))
         go_to_next_page(driver)
 
@@ -78,17 +78,14 @@ def get_properties_data(driver):
             "property_type": 1 if "casa" in property_divs["location"].lower() else 2,
             "total_price": property_divs["prices"].split("\n")[0].replace("R$ ", "").replace(".", ""),
             "condo_fee": 0 if "Cond" not in property_divs["prices"] else
-            property_divs["prices"].split("R$")[2].split(" ")[1],
+            property_divs["prices"].replace("\nPreço abaixo do mercado", "").split("R$")[2].split(" ")[1],
             "area": property_divs["area"].split(" ")[0],
             "bedroom_qnt": property_divs["bedrooms"],
             "bathroom_qnt": property_divs["bathrooms"],
             "parking_spaces_qnt": property_divs["parking_spaces"]
         }
 
-        for prop in list(property_data.keys()):
-            print(f"{prop}: {property_data[prop]}")
-        print("")
-
+        write_property_info_on_csv(list(property_data.values()))
         properties.append(property_data)
 
     return properties
@@ -122,12 +119,9 @@ def safe_find_property_div(card, selector):
 
 
 def write_property_info_on_csv(row):
-    pass
-    """""
-    with open("./utils/data.csv", 'a', newline='') as csv_file:
+    with open("../data/properties_data.csv", 'a', newline='') as csv_file:
         writer = csv.writer(csv_file)
         writer.writerow(row)
-    """""
 
 
 property_types = [
