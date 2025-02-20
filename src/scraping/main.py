@@ -49,7 +49,6 @@ def launch_browser(url, district):
         sleep(randint(15, 45))
         go_to_next_page(driver)
 
-
     driver.quit()
 
 
@@ -61,6 +60,20 @@ def load_all_page_ads(driver):
 def go_to_next_page(driver):
     button = driver.find_element(By.CSS_SELECTOR, 'button[data-testid="next-page"]')
     button.click()
+
+
+def handle_hyphenated_range(value):
+    if isinstance(value, str) and "-" in value and all(val.isnumeric() for val in value.split("-")):
+        parts = value.split("-")
+        return str((int(parts[0]) + int(parts[1])) / 2)
+    return value
+
+
+def convert_to_numeric(value):
+    try:
+        return float(value)
+    except (ValueError, TypeError):
+        return value
 
 
 def get_properties_data(driver, district):
@@ -84,11 +97,16 @@ def get_properties_data(driver, district):
             "bedroom_qnt": property_divs["bedrooms"],
             "bathroom_qnt": property_divs["bathrooms"],
             "parking_spaces_qnt": 0 if not property_divs["parking_spaces"] else property_divs["parking_spaces"],
+            "sq_m_price": None
         }
 
         for prop in list(property_data.keys()):
-            if (isinstance(property_data[prop], str)) and ("-" in property_data[prop]) and (property_data[prop].replace("-", "").isnumeric()):
-                property_data[prop] = (int(property_data[prop].split("-")[0]) + int(property_data[prop].split("-")[1])) / 2
+            property_data[prop] = handle_hyphenated_range(property_data[prop])
+            if prop in ["total_price", "condo_fee", "area", "bedroom_qnt", "bathroom_qnt", "parking_spaces_qnt"]:
+                property_data[prop] = convert_to_numeric(property_data[prop])
+
+        property_data["sq_m_price"] = round(property_data["total_price"] / property_data["area"])
+
         write_property_info_on_csv(list(property_data.values()))
         properties.append(property_data)
 
