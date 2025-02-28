@@ -2,13 +2,21 @@ import math
 
 import undetected_chromedriver as uc
 import csv
-from districts import districts_list
 from random import randint
 from time import sleep
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from random_user_agent.user_agent import UserAgent
 from random_user_agent.params import SoftwareName, OperatingSystem
+
+
+def get_links():
+    links = []
+    with open("utils/links.txt", mode="r", encoding="utf-8") as file:
+        for line in file:
+            links.append(line.replace('\n', ''))
+
+    return links
 
 
 def get_user_agent():
@@ -36,11 +44,12 @@ def get_ads_quantity(driver):
         return 0
 
 
-def launch_browser(url, district):
+def launch_browser(url):
     driver = uc.Chrome(options=get_chrome_options())
     driver.get(url)
 
     total_pages = math.ceil(get_ads_quantity(driver) / 105)
+    district = url.replace('https://www.zapimoveis.com.br/', '').split('/')[2].split('+')[-1]
     for i in range(total_pages):
         sleep(randint(5, 10))
         load_all_page_ads(driver)
@@ -158,8 +167,9 @@ property_types = [
     "flat_residencial",
     "loft_residencial"
 ]
-for zone, districts in districts_list.items():
-    for district in districts:
-        website = f"https://www.zapimoveis.com.br/venda/imoveis/sp+sao-paulo+{zone}+{district}/?tipos={",".join(property_types)}"
-        launch_browser(website, district)
-        sleep(randint(5, 15))
+
+links = get_links()
+for link in links:
+    website = f"{link}?tipos={",".join(property_types)}" if property_types else link
+    launch_browser(website)
+    sleep(randint(5, 15))
