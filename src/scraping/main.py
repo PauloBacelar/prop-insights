@@ -155,21 +155,47 @@ def write_property_info_on_csv(row):
         writer.writerow(row)
 
 
-property_types = [
-    "apartamento_residencial",
-    "studio_residencial",
-    "kitnet_residencial",
-    "casa_residencial",
-    "sobrado_residencial",
-    "condominio_residencial",
-    "casa-vila_residencial",
-    "cobertura_residencial",
-    "flat_residencial",
-    "loft_residencial"
-]
+# URL parameters/filters. Personalize it however you want
+url_params = {
+    "tipos": [
+        "apartamento_residencial",
+        "studio_residencial",
+        "kitnet_residencial",
+        "casa_residencial",
+        "sobrado_residencial",
+        "condominio_residencial",
+        "casa-vila_residencial",
+        "cobertura_residencial",
+        "flat_residencial",
+        "loft_residencial"
+    ],
+    "proximoMetro": True,
+    # "quartos": 2,
+    # "banheiros": 1,
+    # "vagas": 0,
+    # "precoMinimo": 0,
+    # "precoMaximo": 750000,
+    # "areaMinima": 40,
+    # "areaMaxima": 100,
+    # "precoMinimoCondo": 0,
+    # "precoMaximoCondo": 1000,
+}
 
 links = get_links()
 for link in links:
-    website = f"{link}?tipos={",".join(property_types)}" if property_types else link
+    website = link
+
+    if "quartos" in url_params.keys() and url_params["quartos"] > 0:
+        website += str(url_params["quartos"]) + "-quartos/"
+
+    website += "?"
+    if len(url_params["tipos"]) > 0:
+        website += "&tipos=" + ','.join(url_params["tipos"])
+
+    for key, value in url_params.items():
+        if key in ["tipos"]:
+            continue
+        website += "&" + key + "=" + str(value)
+
     launch_browser(website)
     sleep(randint(5, 15))
