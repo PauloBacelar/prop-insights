@@ -1,3 +1,4 @@
+property_id,district,property_type,total_price,condo_fee,area,bedroom_qnt,bathroom_qnt,parking_spaces_qnt,sq_m_price
 2758498583,tucuruvi,1,510000.0,0.0,130.0,3.0,3.0,1.0,3923
 2773679754,tucuruvi,2,2400000.0,0.0,155.0,3.5,3.5,2.0,15484
 2734224521,tucuruvi,1,850000.0,0.0,120.0,3.0,3.0,1.0,7083
