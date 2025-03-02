@@ -4,8 +4,8 @@ Este projeto é um web scraper que extrai dados de imóveis do [ZAP Imóveis](ht
 
 ## Funcionalidades
 
-- Raspa anúncios de imóveis do Zap Imóveis
-- Usa um driver undetectable Chrome para evitar bloqueios
+- Realiza scraping dos anúncios de imóveis do Zap Imóveis
+- Usa o driver undetectable Chrome para evitar bloqueios
 - Alterna entre diferentes user agents para reduzir o risco de detecção
 - Extrai detalhes do imóvel, como preço, área, localização e características
 - Armazena os dados coletados em um arquivo CSV para análise
